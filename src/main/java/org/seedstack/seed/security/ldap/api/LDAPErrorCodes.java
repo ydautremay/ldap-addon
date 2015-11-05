@@ -7,7 +7,7 @@
  */
 package org.seedstack.seed.security.ldap.api;
 
-import org.seedstack.seed.core.api.ErrorCode;
+import org.seedstack.seed.ErrorCode;
 
 /**
  * Enum for Error codes in LDAP security support

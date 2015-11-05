@@ -15,7 +15,7 @@ import com.unboundid.ldap.sdk.SearchScope;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.seedstack.seed.core.api.Configuration;
+import org.seedstack.seed.Configuration;
 import org.seedstack.seed.security.ldap.api.LDAPException;
 import org.seedstack.seed.security.ldap.api.LDAPSupport;
 import org.seedstack.seed.security.ldap.api.LDAPUserContext;

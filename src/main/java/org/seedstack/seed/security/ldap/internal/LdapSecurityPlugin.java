@@ -18,7 +18,7 @@ import io.nuun.kernel.core.AbstractPlugin;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.seedstack.seed.core.api.SeedException;
+import org.seedstack.seed.SeedException;
 import org.seedstack.seed.core.internal.application.ApplicationPlugin;
 import org.seedstack.seed.security.ldap.api.LDAPErrorCodes;
 

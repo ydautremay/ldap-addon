@@ -7,7 +7,7 @@
  */
 package org.seedstack.seed.security.ldap.api;
 
-import org.seedstack.seed.security.api.principals.PrincipalProvider;
+import org.seedstack.seed.security.principals.PrincipalProvider;
 
 /**
  * A PrincipalProvider for a LDAPUserContext
