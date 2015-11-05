@@ -5,19 +5,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.seed.security.ldap.api;
+package org.seedstack.ldap;
 
 /**
  * Seed exception for LDAP errors.
  */
-public class LDAPException extends Exception {
+public class LdapException extends Exception {
 
     private static final long serialVersionUID = -1042979744132023211L;
 
     /**
      * Constructor
      */
-    public LDAPException() {
+    public LdapException() {
         super();
     }
 
@@ -27,7 +27,7 @@ public class LDAPException extends Exception {
      * @param message message
      * @param cause   cause
      */
-    public LDAPException(String message, Throwable cause) {
+    public LdapException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -36,7 +36,7 @@ public class LDAPException extends Exception {
      *
      * @param message message
      */
-    public LDAPException(String message) {
+    public LdapException(String message) {
         super(message);
     }
 
@@ -45,7 +45,7 @@ public class LDAPException extends Exception {
      *
      * @param cause cause
      */
-    public LDAPException(Throwable cause) {
+    public LdapException(Throwable cause) {
         super(cause);
     }
 

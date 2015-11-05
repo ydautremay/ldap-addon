@@ -15,21 +15,19 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.seedstack.ldap.LdapService;
+import org.seedstack.ldap.LdapUserContext;
 import org.seedstack.seed.it.SeedITRunner;
 import org.seedstack.seed.it.WithPlugins;
-import org.seedstack.seed.security.SecuritySupport;
-import org.seedstack.seed.security.WithUser;
-import org.seedstack.seed.security.ldap.api.LDAPException;
-import org.seedstack.seed.security.ldap.api.LDAPSupport;
-import org.seedstack.seed.security.ldap.api.LDAPUserContext;
+import org.seedstack.ldap.LdapException;
 
 import javax.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SeedITRunner.class)
-@WithPlugins(LDAPITPlugin.class)
-public class LDAPRealmIT {
+@WithPlugins(LdapITPlugin.class)
+public class LdapRealmIT {
 
     @Inject
     private SecurityManager securityManager;
@@ -38,15 +36,15 @@ public class LDAPRealmIT {
     private SecuritySupport securitySupport;
 
     @Inject
-    private LDAPSupport ldapSupport;
+    private LdapService ldapService;
 
     @Test
     @WithUser(id = "jdoe", password = "password")
-    public void completeTest() throws LDAPException {
+    public void completeTest() throws LdapException {
         assertThat(securitySupport.hasRole("jedi")).isTrue();
-        LDAPUserContext userContext = securitySupport.getPrincipalsByType(LDAPUserContext.class).iterator().next().getPrincipal();
-        assertThat(ldapSupport.getAttributeValue(userContext, "sn")).isEqualTo("jdoe");
-        assertThat(ldapSupport.getAttributeValue(userContext, "dummy")).isNull();
+        LdapUserContext userContext = securitySupport.getPrincipalsByType(LdapUserContext.class).iterator().next().getPrincipal();
+        assertThat(ldapService.getAttributeValue(userContext, "sn")).isEqualTo("jdoe");
+        assertThat(ldapService.getAttributeValue(userContext, "dummy")).isNull();
     }
 
     @Test(expected = IncorrectCredentialsException.class)

@@ -5,13 +5,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.seed.security.ldap.api;
+package org.seedstack.ldap.internal;
 
 import org.seedstack.seed.ErrorCode;
 
 /**
  * Enum for Error codes in LDAP security support
  */
-public enum LDAPErrorCodes implements ErrorCode {
-    LDAP_ERROR, NO_SUCH_ACCOUNT, INVALID_CREDENTIALS, CONNECT_ERROR, NO_HOST_DEFINED;
+public enum LdapErrorCodes implements ErrorCode {
+    // Please keep it ordered
+    CONNECT_ERROR,
+    INVALID_CREDENTIALS,
+    LDAP_ERROR,
+    NO_HOST_DEFINED,
+    NO_SUCH_ACCOUNT,
 }

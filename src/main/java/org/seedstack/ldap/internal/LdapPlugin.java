@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.seed.security.ldap.internal;
+package org.seedstack.ldap.internal;
 
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
@@ -20,50 +20,45 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.seedstack.seed.SeedException;
 import org.seedstack.seed.core.internal.application.ApplicationPlugin;
-import org.seedstack.seed.security.ldap.api.LDAPErrorCodes;
+import org.seedstack.seed.core.utils.ConfigurationUtils;
+import org.seedstack.seed.security.internal.SecurityPlugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class LdapSecurityPlugin extends AbstractPlugin {
+public class LdapPlugin extends AbstractPlugin {
 
-    private static final String LDAP_CONFIG_PREFIX = "org.seedstack.seed.security.ldap";
+    public static final String LDAP_CONFIG_PREFIX = "org.seedstack.ldap";
 
-    private static final String CHOSEN_REALMS = "org.seedstack.seed.security.realms";
-
+    private static final String CHOSEN_REALMS = ConfigurationUtils.buildKey(SecurityPlugin.SECURITY_PREFIX, "realms");
     private static final String SERVER_HOST_PROP = "server-host";
-
     private static final String SERVER_PORT_PROP = "server-port";
+    private static final String NUM_CONNECTIONS_PROP = "num-connections";
+    private static final String ACCOUNT_DN_PROP = "account-dn";
+    private static final String ACCOUNT_PASSWORD_PROP = "account-password";
+    private static final int DEFAULT_NUM_CONNECTIONS = 10;
     private static final int DEFAULT_SERVER_PORT = 389;
 
-    private static final String NUM_CONNECTIONS_PROP = "num-connections";
-    private static final int DEFAULT_NUM_CONNECTIONS = 10;
-
-    private static final String ACCOUNT_DN_PROP = "account-dn";
-
-    private static final String ACCOUNT_PASSWORD_PROP = "account-password";
-
     private LDAPConnectionPool ldapConnectionPool;
-
     private boolean startPlugin;
 
     @Override
     public String name() {
-        return "LdapSecurityPlugin";
+        return "ldap";
     }
 
     @Override
     public InitState init(InitContext initContext) {
         ApplicationPlugin appPlugin = (ApplicationPlugin) initContext.pluginsRequired().iterator().next();
         String[] realms = appPlugin.getApplication().getConfiguration().getStringArray(CHOSEN_REALMS);
-        startPlugin = ArrayUtils.contains(realms, LDAPRealm.class.getSimpleName());
+        startPlugin = ArrayUtils.contains(realms, LdapRealm.class.getSimpleName());
 
         if (startPlugin) {
             Configuration ldapConfiguration = appPlugin.getApplication().getConfiguration().subset(LDAP_CONFIG_PREFIX);
             // Initialize ldap pool connection
             String host = ldapConfiguration.getString(SERVER_HOST_PROP);
             if (host == null) {
-                throw SeedException.createNew(LDAPErrorCodes.NO_HOST_DEFINED).put("hostPropName", LDAP_CONFIG_PREFIX + "." + SERVER_HOST_PROP);
+                throw SeedException.createNew(LdapErrorCodes.NO_HOST_DEFINED).put("hostPropName", LDAP_CONFIG_PREFIX + "." + SERVER_HOST_PROP);
             }
             int port = ldapConfiguration.getInt(SERVER_PORT_PROP, DEFAULT_SERVER_PORT);
             int numConnections = ldapConfiguration.getInt(NUM_CONNECTIONS_PROP, DEFAULT_NUM_CONNECTIONS);
@@ -75,18 +70,18 @@ public class LdapSecurityPlugin extends AbstractPlugin {
             } catch (LDAPException e) {
                 switch (e.getResultCode().intValue()) {
                     case ResultCode.NO_SUCH_OBJECT_INT_VALUE:
-                        throw SeedException.wrap(e, LDAPErrorCodes.NO_SUCH_ACCOUNT).put("account", accountDn)
+                        throw SeedException.wrap(e, LdapErrorCodes.NO_SUCH_ACCOUNT).put("account", accountDn)
                                 .put("propName", LDAP_CONFIG_PREFIX + "." + ACCOUNT_DN_PROP);
                     case ResultCode.INVALID_CREDENTIALS_INT_VALUE:
-                        throw SeedException.wrap(e, LDAPErrorCodes.INVALID_CREDENTIALS).put("account", accountDn)
+                        throw SeedException.wrap(e, LdapErrorCodes.INVALID_CREDENTIALS).put("account", accountDn)
                                 .put("passwordPropName", LDAP_CONFIG_PREFIX + "." + ACCOUNT_PASSWORD_PROP)
                                 .put("userPropName", LDAP_CONFIG_PREFIX + "." + ACCOUNT_DN_PROP);
                     case ResultCode.CONNECT_ERROR_INT_VALUE:
-                        throw SeedException.wrap(e, LDAPErrorCodes.CONNECT_ERROR).put("host", host).put("port", port)
+                        throw SeedException.wrap(e, LdapErrorCodes.CONNECT_ERROR).put("host", host).put("port", port)
                                 .put("hostPropName", LDAP_CONFIG_PREFIX + "." + SERVER_HOST_PROP)
                                 .put("portPropName", LDAP_CONFIG_PREFIX + "." + SERVER_PORT_PROP);
                     default:
-                        throw SeedException.wrap(e, LDAPErrorCodes.LDAP_ERROR).put("message", e.getMessage()).put("host", host).put("port", port)
+                        throw SeedException.wrap(e, LdapErrorCodes.LDAP_ERROR).put("message", e.getMessage()).put("host", host).put("port", port)
                                 .put("account", accountDn);
                 }
             }
@@ -103,15 +98,17 @@ public class LdapSecurityPlugin extends AbstractPlugin {
 
     @Override
     public Object nativeUnitModule() {
-        if (startPlugin)
-            return new LdapSecurityModule(ldapConnectionPool);
+        if (startPlugin) {
+            return new LdapModule(ldapConnectionPool);
+        }
         return null;
     }
 
     @Override
     public void stop() {
-        if (ldapConnectionPool != null)
+        if (ldapConnectionPool != null) {
             ldapConnectionPool.close();
+        }
     }
 
 }

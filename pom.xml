@@ -25,9 +25,7 @@
         <seed.version>2.1.0-M1-SNAPSHOT</seed.version>
         <unboundid.version>2.3.8</unboundid.version>
 
-        <compatibility.groupId>org.seedstack.seed</compatibility.groupId>
-        <compatibility.artifactId>seed-security-support-ldap</compatibility.artifactId>
-        <compatibility.version>2.0.0</compatibility.version>
+        <compatibility.skip>true</compatibility.skip>
     </properties>
 
     <build>
@@ -72,7 +70,7 @@
                         <parameter>
                             <excludes>
                                 <exclude>*.internal.*</exclude>
-                                <exclude>org.seedstack.seed.security.ldap.LDAPErrorCode</exclude>
+                                <exclude>org.seedstack.ldap.LDAPErrorCode</exclude>
                             </excludes>
                         </parameter>
                     </configuration>
