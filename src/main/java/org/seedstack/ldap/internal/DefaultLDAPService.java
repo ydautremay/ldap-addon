@@ -5,70 +5,61 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.seed.security.ldap.internal;
+package org.seedstack.ldap.internal;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPConnectionPool;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchScope;
+import com.unboundid.ldap.sdk.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.seedstack.seed.core.api.Configuration;
-import org.seedstack.seed.security.ldap.api.LDAPException;
-import org.seedstack.seed.security.ldap.api.LDAPSupport;
-import org.seedstack.seed.security.ldap.api.LDAPUserContext;
+import org.seedstack.ldap.LdapService;
+import org.seedstack.ldap.LdapUserContext;
+import org.seedstack.ldap.LdapException;
+import org.seedstack.seed.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-class DefaultLDAPSupport implements LDAPSupport {
+class DefaultLdapService implements LdapService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DefaultLDAPSupport.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DefaultLdapService.class);
 
-    @Configuration("org.seedstack.seed.security.ldap.user-base")
+    @Configuration(LdapPlugin.LDAP_CONFIG_PREFIX + ".user-base")
     private String[] userBase;
 
-    @Configuration(value = "org.seedstack.seed.security.ldap.user-class", mandatory = false)
+    @Configuration(value = LdapPlugin.LDAP_CONFIG_PREFIX + ".user-class", mandatory = false)
     private String userObjectClass;
 
-    @Configuration(value = "org.seedstack.seed.security.ldap.user-identity-attribute", defaultValue = "uid")
+    @Configuration(value = LdapPlugin.LDAP_CONFIG_PREFIX + ".user-identity-attribute", defaultValue = "uid")
     private String userIdentityAttribute;
 
-    @Configuration(value = "org.seedstack.seed.security.ldap.user-additional-attributes", mandatory = false)
+    @Configuration(value = LdapPlugin.LDAP_CONFIG_PREFIX + ".user-additional-attributes", mandatory = false)
     private String[] userAdditionalAttributes;
 
-    @Configuration("org.seedstack.seed.security.ldap.group-base")
+    @Configuration(LdapPlugin.LDAP_CONFIG_PREFIX + ".group-base")
     private String[] groupBase;
 
-    @Configuration(value = "org.seedstack.seed.security.ldap.group-class", mandatory = false)
+    @Configuration(value = LdapPlugin.LDAP_CONFIG_PREFIX + ".group-class", mandatory = false)
     private String groupObjectClass;
 
-    @Configuration(value = "org.seedstack.seed.security.ldap.group-member-attribute", defaultValue = "member")
+    @Configuration(value = LdapPlugin.LDAP_CONFIG_PREFIX + ".group-member-attribute", defaultValue = "member")
     private String groupMemberAttribute;
 
     @Inject
-    LDAPConnectionPool ldapConnectionPool;
+    private LDAPConnectionPool ldapConnectionPool;
 
     @Override
-    public LDAPUserContext createUserContext(String dn) {
+    public LdapUserContext createUserContext(String dn) {
         return internalCreateUser(dn);
     }
 
-    private DefaultLDAPUserContext internalCreateUser(String dn) {
-        return new DefaultLDAPUserContext(dn);
+    private DefaultLdapUserContext internalCreateUser(String dn) {
+        return new DefaultLdapUserContext(dn);
     }
 
     @Override
-    public LDAPUserContext findUser(String identityAttributeValue) throws LDAPException {
+    public LdapUserContext findUser(String identityAttributeValue) throws LdapException {
         try {
             Filter userClassFilter;
             if (userObjectClass != null && !userObjectClass.isEmpty()) {
@@ -81,46 +72,48 @@ class DefaultLDAPSupport implements LDAPSupport {
             String[] attributesToRetrieve;
             if (userAdditionalAttributes != null) {
                 attributesToRetrieve = userAdditionalAttributes;
-                if (!ArrayUtils.contains(attributesToRetrieve, "cn") || !ArrayUtils.contains(attributesToRetrieve, "CN"))
+                if (!ArrayUtils.contains(attributesToRetrieve, "cn") || !ArrayUtils.contains(attributesToRetrieve, "CN")) {
                     ArrayUtils.add(attributesToRetrieve, "cn");
-            } else
+                }
+            } else {
                 attributesToRetrieve = new String[]{"cn"};
+            }
             SearchResult searchResult = ldapConnectionPool.search(StringUtils.join(userBase, ','), SearchScope.SUB, filter, attributesToRetrieve);
             if (searchResult.getEntryCount() != 1) {
                 throw new UnknownAccountException();
             }
             SearchResultEntry searchResultEntry = searchResult.getSearchEntries().get(0);
             String dn = searchResultEntry.getDN();
-            DefaultLDAPUserContext ldapUserContext = internalCreateUser(dn);
+            DefaultLdapUserContext ldapUserContext = internalCreateUser(dn);
             ldapUserContext.getKnownAttributes().put("cn", searchResultEntry.getAttributeValue("cn"));
             return ldapUserContext;
         } catch (com.unboundid.ldap.sdk.LDAPException e) {
-            throw new LDAPException(e);
+            throw new LdapException(e);
         }
     }
 
     @Override
-    public void authenticate(LDAPUserContext userContext, String password) throws LDAPException {
+    public void authenticate(LdapUserContext userContext, String password) throws LdapException {
         try {
             ldapConnectionPool.bindAndRevertAuthentication(userContext.getDn(), password);
         } catch (com.unboundid.ldap.sdk.LDAPException e) {
-            throw new LDAPException(e);
+            throw new LdapException(e);
         }
     }
 
     @Override
-    public String getAttributeValue(LDAPUserContext userContext, String attribute) throws LDAPException {
-        if (((DefaultLDAPUserContext) userContext).getKnownAttributes().get(attribute.toLowerCase()) != null) {
-            return ((DefaultLDAPUserContext) userContext).getKnownAttributes().get(attribute.toLowerCase());
+    public String getAttributeValue(LdapUserContext userContext, String attribute) throws LdapException {
+        if (((DefaultLdapUserContext) userContext).getKnownAttributes().get(attribute.toLowerCase()) != null) {
+            return ((DefaultLdapUserContext) userContext).getKnownAttributes().get(attribute.toLowerCase());
         }
         return getAttributeValues(userContext, attribute).get(attribute);
     }
 
     @Override
-    public Map<String, String> getAttributeValues(LDAPUserContext userContext, String... attributes) throws LDAPException {
+    public Map<String, String> getAttributeValues(LdapUserContext userContext, String... attributes) throws LdapException {
         Map<String, String> result = new HashMap<String, String>();
         List<String> retainedAttr = new ArrayList<String>();
-        Map<String, String> knownAttributes = ((DefaultLDAPUserContext) userContext).getKnownAttributes();
+        Map<String, String> knownAttributes = ((DefaultLdapUserContext) userContext).getKnownAttributes();
         for (String attr : attributes) {
             if (knownAttributes.get(attr.toLowerCase()) == null) {
                 retainedAttr.add(attr.toLowerCase());
@@ -134,7 +127,7 @@ class DefaultLDAPSupport implements LDAPSupport {
                     knownAttributes.put(attr, entry.getAttributeValue(attr));
                 }
             } catch (com.unboundid.ldap.sdk.LDAPException e) {
-                throw new LDAPException(e);
+                throw new LdapException(e);
             }
         }
         for (String attr : attributes) {
@@ -144,7 +137,7 @@ class DefaultLDAPSupport implements LDAPSupport {
     }
 
     @Override
-    public Set<String> retrieveUserGroups(LDAPUserContext userContext) throws LDAPException {
+    public Set<String> retrieveUserGroups(LdapUserContext userContext) throws LdapException {
         Set<String> groups = new HashSet<String>();
         try {
             Filter groupClassFilter;
@@ -161,7 +154,7 @@ class DefaultLDAPSupport implements LDAPSupport {
             }
             return groups;
         } catch (com.unboundid.ldap.sdk.LDAPException e) {
-            throw new LDAPException(e);
+            throw new LdapException(e);
         }
     }
 }

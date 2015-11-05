@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.seed.security.ldap.api;
+package org.seedstack.ldap;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.Set;
  * Convenient interface to interact with an LDAP with user issues in mind. This interface makes use of the UserContext object. Use the
  * createUserContext or findUser methods to get a userContext instance.
  */
-public interface LDAPSupport {
+public interface LdapService {
 
     /**
      * Creates a new DefaultLDAPUserContext knowing the dn of the user. Note that this method does not make an LDAP call.
@@ -22,7 +22,7 @@ public interface LDAPSupport {
      * @param dn the dn of the user
      * @return the corresponding DefaultLDAPUserContext
      */
-    LDAPUserContext createUserContext(String dn);
+    LdapUserContext createUserContext(String dn);
 
     /**
      * Creates a new DefaultLDAPUserContext based on the identifying attribute of the user. The identifying attribute is the one defined in the
@@ -30,17 +30,17 @@ public interface LDAPSupport {
      *
      * @param identityAttributeValue the value of the identifying attribute to search
      * @return the DefaultLDAPUserContext corresponding to the attribute value.
-     * @throws LDAPException if an error occurs or if no user matches the attribute value.
+     * @throws LdapException if an error occurs or if no user matches the attribute value.
      */
-    LDAPUserContext findUser(String identityAttributeValue) throws LDAPException;
+    LdapUserContext findUser(String identityAttributeValue) throws LdapException;
 
     /**
-     * Authentifies a user with its context
+     * Authenticates a user with its context
      *
      * @param userContext the context of a user
-     * @throws LDAPException if an error occurs or the user is not authenticated.
+     * @throws LdapException if an error occurs or the user is not authenticated.
      */
-    void authenticate(LDAPUserContext userContext, String password) throws LDAPException;
+    void authenticate(LdapUserContext userContext, String password) throws LdapException;
 
     /**
      * Gives the value of the attribute name passed as parameter. Note that this method will call the LDAP only if the attribute value has not yet
@@ -49,9 +49,9 @@ public interface LDAPSupport {
      * @param userContext the DefaultLDAPUserContext used
      * @param attribute   the name of the attribute
      * @return the value of the attribute passed as a parameter, or null if the attribute does not exist.
-     * @throws LDAPException if an error occurs while accessing the LDAP
+     * @throws LdapException if an error occurs while accessing the LDAP
      */
-    String getAttributeValue(LDAPUserContext userContext, String attribute) throws LDAPException;
+    String getAttributeValue(LdapUserContext userContext, String attribute) throws LdapException;
 
     /**
      * Gives the value of the attribute names passed as parameters. Note that this method will call the LDAP only if the attribute values have not yet
@@ -60,17 +60,17 @@ public interface LDAPSupport {
      *
      * @param userContext the DefaultLDAPUserContext used
      * @param attributes  the names of the attributes
-     * @return the values of the attributes passed as a parameters as a map. Unexisting attributes in the LDAP will give null values.
-     * @throws LDAPException if an error occurs while accessing the LDAP.
+     * @return the values of the attributes passed as a parameters as a map. Non existing attributes in the LDAP will give null values.
+     * @throws LdapException if an error occurs while accessing the LDAP.
      */
-    Map<String, String> getAttributeValues(LDAPUserContext userContext, String... attributes) throws LDAPException;
+    Map<String, String> getAttributeValues(LdapUserContext userContext, String... attributes) throws LdapException;
 
     /**
      * Finds all the groups in which the user is defined as a member. Note that this method will effectively call the LDAP each time it is executed.
      *
      * @param userContext the userContext to use
      * @return the groups as a set of the groups CNs
-     * @throws LDAPException if an error occurs while accessing the ldap.
+     * @throws LdapException if an error occurs while accessing the ldap.
      */
-    Set<String> retrieveUserGroups(LDAPUserContext userContext) throws LDAPException;
+    Set<String> retrieveUserGroups(LdapUserContext userContext) throws LdapException;
 }

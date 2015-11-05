@@ -6,7 +6,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-[org.seedstack.seed.security.ldap]
+[org.seedstack.ldap]
 server-host = 
 server-port = 53800
 account-dn = cn=admin, ou=people, dc=example,dc=com
@@ -17,7 +17,7 @@ group-base = ou=groups, dc=example,dc=com
 
 
 [org.seedstack.seed.security]
-realms = LDAPRealm
+realms = LdapRealm
 
 [org.seedstack.seed.security.roles]
 jedi = SEED.JEDI
