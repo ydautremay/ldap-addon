@@ -7,17 +7,16 @@
  */
 package org.seedstack.seed.security;
 
+import com.google.common.collect.Lists;
 import com.unboundid.ldap.listener.InMemoryDirectoryServer;
 import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
 import com.unboundid.ldap.listener.InMemoryListenerConfig;
 import com.unboundid.ldap.sdk.LDAPException;
-import io.nuun.kernel.api.Plugin;
 import io.nuun.kernel.api.plugin.InitState;
 import io.nuun.kernel.api.plugin.context.InitContext;
 import io.nuun.kernel.core.AbstractPlugin;
 import org.seedstack.ldap.internal.LdapPlugin;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class LdapITPlugin extends AbstractPlugin {
@@ -30,10 +29,8 @@ public class LdapITPlugin extends AbstractPlugin {
     }
 
     @Override
-    public Collection<Class<? extends Plugin>> dependentPlugins() {
-        Collection<Class<? extends Plugin>> plugins = new ArrayList<Class<? extends Plugin>>();
-        plugins.add(LdapPlugin.class);
-        return plugins;
+    public Collection<Class<?>> dependentPlugins() {
+        return Lists.<Class<?>>newArrayList(LdapPlugin.class);
     }
 
     @Override
