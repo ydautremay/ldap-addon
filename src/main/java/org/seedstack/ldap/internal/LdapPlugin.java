@@ -7,11 +7,11 @@
  */
 package org.seedstack.ldap.internal;
 
+import com.google.common.collect.Lists;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
-import io.nuun.kernel.api.Plugin;
 import io.nuun.kernel.api.plugin.InitState;
 import io.nuun.kernel.api.plugin.context.InitContext;
 import io.nuun.kernel.core.AbstractPlugin;
@@ -19,11 +19,10 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.seedstack.seed.SeedException;
-import org.seedstack.seed.core.internal.application.ApplicationPlugin;
+import org.seedstack.seed.core.spi.configuration.ConfigurationProvider;
 import org.seedstack.seed.core.utils.ConfigurationUtils;
 import org.seedstack.seed.security.internal.SecurityPlugin;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class LdapPlugin extends AbstractPlugin {
@@ -49,12 +48,12 @@ public class LdapPlugin extends AbstractPlugin {
 
     @Override
     public InitState init(InitContext initContext) {
-        ApplicationPlugin appPlugin = (ApplicationPlugin) initContext.pluginsRequired().iterator().next();
-        String[] realms = appPlugin.getApplication().getConfiguration().getStringArray(CHOSEN_REALMS);
+        Configuration configuration = initContext.dependency(ConfigurationProvider.class).getConfiguration();
+        String[] realms = configuration.getStringArray(CHOSEN_REALMS);
         startPlugin = ArrayUtils.contains(realms, LdapRealm.class.getSimpleName());
 
         if (startPlugin) {
-            Configuration ldapConfiguration = appPlugin.getApplication().getConfiguration().subset(LDAP_CONFIG_PREFIX);
+            Configuration ldapConfiguration = configuration.subset(LDAP_CONFIG_PREFIX);
             // Initialize ldap pool connection
             String host = ldapConfiguration.getString(SERVER_HOST_PROP);
             if (host == null) {
@@ -90,10 +89,8 @@ public class LdapPlugin extends AbstractPlugin {
     }
 
     @Override
-    public Collection<Class<? extends Plugin>> requiredPlugins() {
-        Collection<Class<? extends Plugin>> plugins = new ArrayList<Class<? extends Plugin>>();
-        plugins.add(ApplicationPlugin.class);
-        return plugins;
+    public Collection<Class<?>> requiredPlugins() {
+        return Lists.<Class<?>>newArrayList(ConfigurationProvider.class);
     }
 
     @Override
