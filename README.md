@@ -1,6 +1,6 @@
 # SeedStack LDAP add-on
 
-[![Build status](https://travis-ci.org/seedstack/ldap-addon.svg?branch=master)](https://travis-ci.org/seedstack/ldap-addon) [![Coverage Status](https://coveralls.io/repos/seedstack/ldap-addon/badge.svg?branch=master)](https://coveralls.io/r/seedstack/ldap-addon?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.seedstack.addons/ldap/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.seedstack.addons/ldap)
+[![Build status](https://travis-ci.org/seedstack/ldap-addon.svg?branch=master)](https://travis-ci.org/seedstack/ldap-addon) [![Coverage Status](https://coveralls.io/repos/seedstack/ldap-addon/badge.svg?branch=master)](https://coveralls.io/r/seedstack/ldap-addon?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.seedstack.addons.ldap/ldap/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.seedstack.addons.ldap/ldap)
 
 Official LDAP integration for SeedStack.
 
